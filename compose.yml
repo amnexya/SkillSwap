@@ -1,0 +1,27 @@
+services:
+  app:
+    image: alpine:latest
+    container_name: skillswap
+    command: ["apk", "add", "bash", "curl", "jq", "git", "openssh-client", "ca-certificates", "python3", "python3-dev", "py3-pip", "build-base", "libffi-dev", "openssl-dev", "&&", "git", "clone", "https://github.com/amnexya/skillswap.git", "&&", "cd", "skillswap", "&&", "pip3", "install", "-r", "requirements.txt"]
+    volumes:
+      - /srv/skillswap/data:/app
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+  
+  db:
+    image: mariadb:latest
+    container_name: skillswap_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword # CHANGEME
+      MYSQL_DATABASE: skillswap
+      MYSQL_USER: skillswap
+      MYSQL_PASSWORD: skillswap_password # CHANGEME
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+
+volumes:
+  db_data: {}
