@@ -1,7 +1,8 @@
 ```mermaid
 gantt
-    title SkillSwap
-    dateFormat  DD-MM-YYYY
+    title SkillSwap – Team 5 Project Plan
+    dateFormat  YYYY-MM-DD
+    excludes    weekends
 
     section Technical Design Doc
     System Description          :done,    td1, 2026-03-04, 2026-03-06
