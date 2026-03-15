@@ -2,6 +2,8 @@
 from app import app, db, info, warn
 from app.models import User, Post, Message, Transactions, Moderation
 from werkzeug.security import generate_password_hash, check_password_hash
+import smtplib
+import ssl
 
 def create_user(email, password, admin):
     try:
@@ -42,4 +44,24 @@ def create_post(title, description, skill, post_type, user_id):
         return True
     except Exception as e:
         warn(f"Error creating post: {e}")
+        return False
+    
+def send_email(to, subject, body):
+    # Email config
+    port = 465
+    password = app.config['EMAIL_PASSWORD']
+    smtp_server = app.config['EMAIL_SMTP_SERVER']
+    address = app.config['EMAIL_ADDRESS']
+
+    context = ssl.create_default_context()
+
+    try:
+        # try sending
+        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+            server.login(address, password)
+            server.sendmail(address, to, f"From: {address}\nTo: {to}\nSubject: {subject}\n\n{body}\n")
+
+        return True
+    except Exception as e:
+        warn(f"Error sending email: {e}")
         return False
