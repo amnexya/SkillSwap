@@ -25,6 +25,7 @@ def create_user(email, password, admin):
         warn(f"Error creating user: {e}")
         return False
 
+### POSTS ###
 def create_post(title, description, skill, post_type, user_id):
     try:
         # Create the post object
@@ -46,6 +47,50 @@ def create_post(title, description, skill, post_type, user_id):
         warn(f"Error creating post: {e}")
         return False
     
+def fetch_post(post_id):
+    return Post.query.get(post_id)
+
+def update_post(post_id, title=None, description=None, skill=None, post_type=None):
+    try:
+        # query for post
+        post = Post.query.get(post_id)
+        if not post:
+            warn(f"Post with ID {post_id} not found.")
+            return False
+
+        if title is not None:
+            post.title = title
+        if description is not None:
+            post.description = description
+        if skill is not None:
+            post.skill = skill
+        if post_type is not None:
+            post.post_type = post_type
+
+        db.session.commit()
+        info(f"Post updated: {post}")
+        return True
+    except Exception as e:
+        warn(f"Error updating post: {e}")
+        return False
+    
+def delete_post(post_id):
+    try:
+        # find post
+        post = Post.query.get(post_id)
+        if not post:
+            warn(f"Post with ID {post_id} not found.")
+            return False
+
+        # delete and commit
+        db.session.delete(post)
+        db.session.commit()
+        info(f"Post deleted: {post}")
+        return True
+    except Exception as e:
+        warn(f"Error deleting post: {e}")
+        return False
+
 def send_email(to, subject, body):
     # Email config
     port = 465
