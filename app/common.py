@@ -1,14 +1,24 @@
 # All low level functions in here pls
 from app import app, db, info, warn
 from app.models import User, Post, Message, Transactions, Moderation
-from werkzeug.security import generate_password_hash, check_password_hash
+import bcrypt  # For password hashing
+
+def hash_password(password):
+    # Hash the password using bcrypt
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
+
+def check_password(password, hashed):
+    # Check the password against the hashed version
+    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
 def create_user(email, password, admin):
     try:
         # Firstly, create a class for the user
         user = User(
             email=email,
-            password_hash=generate_password_hash(password),
+            password_hash=hash_password(password),
             is_admin=admin
         )
         # Then add to the db and commit
