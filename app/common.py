@@ -2,6 +2,8 @@
 from app import app, db, info, warn
 from app.models import User, Post, Message, Transactions, Moderation
 import bcrypt  # For password hashing
+import smtplib
+import ssl
 
 def hash_password(password):
     # Hash the password using bcrypt
@@ -33,6 +35,7 @@ def create_user(email, password, admin):
         warn(f"Error creating user: {e}")
         return False
 
+### POSTS ###
 def create_post(title, description, skill, post_type, user_id):
     try:
         # Create the post object
@@ -52,4 +55,68 @@ def create_post(title, description, skill, post_type, user_id):
         return True
     except Exception as e:
         warn(f"Error creating post: {e}")
+        return False
+    
+def fetch_post(post_id):
+    return Post.query.get(post_id)
+
+def update_post(post_id, title=None, description=None, skill=None, post_type=None):
+    try:
+        # query for post
+        post = Post.query.get(post_id)
+        if not post:
+            warn(f"Post with ID {post_id} not found.")
+            return False
+
+        if title is not None:
+            post.title = title
+        if description is not None:
+            post.description = description
+        if skill is not None:
+            post.skill = skill
+        if post_type is not None:
+            post.post_type = post_type
+
+        db.session.commit()
+        info(f"Post updated: {post}")
+        return True
+    except Exception as e:
+        warn(f"Error updating post: {e}")
+        return False
+    
+def delete_post(post_id):
+    try:
+        # find post
+        post = Post.query.get(post_id)
+        if not post:
+            warn(f"Post with ID {post_id} not found.")
+            return False
+
+        # delete and commit
+        db.session.delete(post)
+        db.session.commit()
+        info(f"Post deleted: {post}")
+        return True
+    except Exception as e:
+        warn(f"Error deleting post: {e}")
+        return False
+
+def send_email(to, subject, body):
+    # Email config
+    port = 465
+    password = app.config['EMAIL_PASSWORD']
+    smtp_server = app.config['EMAIL_SMTP_SERVER']
+    address = app.config['EMAIL_ADDRESS']
+
+    context = ssl.create_default_context()
+
+    try:
+        # try sending
+        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+            server.login(address, password)
+            server.sendmail(address, to, f"From: {address}\nTo: {to}\nSubject: {subject}\n\n{body}\n")
+
+        return True
+    except Exception as e:
+        warn(f"Error sending email: {e}")
         return False
